@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Trading</title>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+    <script type="text/javascript" src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+    <!-- 구글폰트 -->
+    <link href="https://fonts.googleapis.com/css2?family=Rubik&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Viga&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
+
+    <style type="text/css">
+
+        * {
+            font-family: 'roboto', sans-serif;
+            font-style: bold;
+            color: white;
+        }
+
+        body {
+            background-color: #F4D4D4;
+        }
+
+        .right {
+            position: absolute;
+            right: 100px;
+            width: 400px;
+            border: 1px solid lightgrey;
+            padding: 10px;
+        }
+
+        .left {
+            font-family: 'roboto', sans-serif;
+            font-style: bold;
+            position: absolute;
+            left: 50px;
+        }
+
+    </style>
+
+    <script type="text/javascript">
+
+        window.onload = function () {
+            var dataPoints = [];
+            var chart = new CanvasJS.Chart("chartContainer",{
+                animationEnabled: true,
+                theme: "light2",
+                title:{
+                    text:"Price History",
+                    fontSize: 22,
+                },
+                data: [{
+                    type: "line",
+                    dataPoints : dataPoints,
+                }]
+            });
+            $.getJSON("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=60&interval=daily", function(data) {
+                $.each(data, function(key, value){
+                    dataPoints.push({x: value[0][0], y: value[0][1]});
+                });
+                chart.render();
+            });
+        }
+
+        // Script for posting orders to database
+        //$ajax({
+        //  type: "POST",
+        //url: "/orders",
+        //data: {},
+        // })
+    </script>
+</head>
+
+<body>
+
+<form class="left">
+    <div id="chartContainer" style="height: 400px; width: 700px;"></div>
+</form>
+
+<div>
+    <form class="right">
+        <button type="button" class="btn btn-success">BUY</button>
+        <button type="button" class="btn btn-danger">SELL</button>
+        <div class="input-group mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup-sizing-default">Amount</span>
+            </div>
+            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+        </div>
+        <div class="input-group-append">
+            <span class="input-group-text">$</span>
+            <span class="input-group-text">0.00</span>
+        </div>
+    </form>
+</div>
+</body>
+</html>
