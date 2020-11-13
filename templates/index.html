@@ -34,6 +34,7 @@
             font-family: 'roboto', sans-serif;
             font-style: bold;
             color: white;
+            margin: auto;
         }
 
         body {
@@ -42,10 +43,11 @@
 
         .right {
             position: absolute;
-            right: 100px;
+            right: 50px;
             width: 400px;
             border: 1px solid lightgrey;
             padding: 10px;
+            background-color: lightgrey;
         }
 
         .left {
@@ -53,6 +55,11 @@
             font-style: bold;
             position: absolute;
             left: 50px;
+        }
+
+        button {
+            padding: 10px;
+            margin: 10px;
         }
 
     </style>
@@ -71,6 +78,7 @@
                 data: [{
                     type: "line",
                     dataPoints : dataPoints,
+                    fontSize: 5,
                 }]
             });
             $.getJSON("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=60&interval=daily", function(data) {
@@ -93,7 +101,7 @@
 <body>
 
 <form class="left">
-    <div id="chartContainer" style="height: 400px; width: 700px;"></div>
+    <div id="chartContainer" style="height: 500px; width: 900px;"></div>
 </form>
 
 <div>
