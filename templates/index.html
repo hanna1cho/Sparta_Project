@@ -41,11 +41,29 @@
             background-color: #F4D4D4;
         }
 
+        p {
+            margin: 5px;
+        }
+
+        p.details {
+            margin: 5px;
+            color: dimgray;
+        }
+
+        .topright {
+            position: absolute;
+            right: 50px;
+            top: 50px;
+            width: 400px;
+            background-color: lightsteelblue;
+            align: right;
+        }
+
         .right {
             position: absolute;
             right: 50px;
+            top: 150px;
             width: 400px;
-            border: 1px solid lightgrey;
             padding: 10px;
             background-color: lightgrey;
         }
@@ -55,6 +73,7 @@
             font-style: bold;
             position: absolute;
             left: 50px;
+            top: 50px;
         }
 
         button {
@@ -78,7 +97,6 @@
                 data: [{
                     type: "line",
                     dataPoints : dataPoints,
-                    fontSize: 5,
                 }]
             });
             $.getJSON("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=60&interval=daily", function(data) {
@@ -88,6 +106,20 @@
                 chart.render();
             });
         }
+
+        function currentPrice() {
+            $.ajax({
+                type: "GET",
+                url: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=USD&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false",
+                data: {},
+                success: function (response) {
+                    let btc = response["bitcoin"];
+                    let price = btc["usd"];
+                    $('#update').empty().append(price);
+                    console.log(price);
+                   }
+                })
+            }
 
         // Script for posting orders to database
         //$ajax({
@@ -105,19 +137,33 @@
 </form>
 
 <div>
+    <form class="topright">
+        <p>Available to trade</p>
+        <p class="details"> USD $50,000.00</p>
+        <p class="details"> BTC 0.00 </p>
+    </form>
+
     <form class="right">
-        <button type="button" class="btn btn-success">BUY</button>
-        <button type="button" class="btn btn-danger">SELL</button>
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroup-sizing-default">Amount</span>
-            </div>
-            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+        <div class="form-group">
+            <label for="exampleFormControlSelect1">Order Type</label>
+            <select class="form-control" id="exampleFormControlSelect1">
+                <option>BUY</option>
+                <option>SELL</option>
+            </select>
         </div>
-        <div class="input-group-append">
-            <span class="input-group-text">$</span>
-            <span class="input-group-text">0.00</span>
+        <div class="form-group">
+            <label for="exampleFormControlInput1">Current Market Price (USD$)</label>
+            <input type="text" id="update" class="form-control" id="exampleFormControlInput1" placeholder="$0.00" disabled>
         </div>
+        <div class="form-group">
+            <label for="exampleFormControlInput1">Order Quantity</label>
+            <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="0 BTC">
+        </div>
+        <div class="form-group">
+            <label for="exampleFormControlInput1">Total</label>
+            <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="$0.00">
+        </div>
+         <button type="button" class="btn btn-primary btn-sm">Submit Order</button>
     </form>
 </div>
 </body>
