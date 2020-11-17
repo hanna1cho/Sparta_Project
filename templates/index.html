@@ -41,6 +41,11 @@
             background-color: #F4D4D4;
         }
 
+        h1 {
+            font-size: 30px;
+            color: dimgrey;
+        }
+
         p {
             margin: 5px;
         }
@@ -53,7 +58,7 @@
         .topright {
             position: absolute;
             right: 50px;
-            top: 50px;
+            top: 80px;
             width: 400px;
             background-color: lightsteelblue;
             align: right;
@@ -62,7 +67,7 @@
         .right {
             position: absolute;
             right: 50px;
-            top: 150px;
+            top: 180px;
             width: 400px;
             padding: 10px;
             background-color: lightgrey;
@@ -85,85 +90,218 @@
 
     <script type="text/javascript">
 
+        function unixTime2Date(unix_timestamp) {
+            let date = new Date(unix_timestamp);
+            let year = date.getFullYear();
+            let month = date.getMonth();
+            let day = date.getDate();
+            let seconds = date.getSeconds();
+            let minutes = date.getMinutes();
+            let hour = date.getHours();
+
+            return [year, month, day, hour, minutes, seconds]
+
+        }
+
         window.onload = function () {
-            var dataPoints = [];
-            var chart = new CanvasJS.Chart("chartContainer",{
+            let balance = 1000;
+            let dataPoints = [];
+            let currentPrice = -1;
+            let chart = new CanvasJS.Chart("chartContainer", {
                 animationEnabled: true,
                 theme: "light2",
-                title:{
-                    text:"Price History",
-                    fontSize: 22,
+                axisX: [
+                    {
+                        labelFontSize: 12,
+                    },
+                ],
+                axisY: [
+                    {
+                        labelFontSize: 12,
+                    },
+                ],
+                title: {
+                    text: "Real-Time Price Chart",
+                    labelFontFamily: "roboto",
+                    fontSize: 20,
+                    padding: 10,
+                    horizontalAlign: "left"
                 },
                 data: [{
                     type: "line",
-                    dataPoints : dataPoints,
+                    dataPoints: dataPoints,
                 }]
             });
-            $.getJSON("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=60&interval=daily", function(data) {
-                $.each(data, function(key, value){
-                    dataPoints.push({x: value[0][0], y: value[0][1]});
-                });
+            $.getJSON("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1", function (data) {
+                let prices = data['prices'];
+                for (let i = prices.length - 10; i < prices.length; i++) {
+                    let unix_time = prices[i][0];
+                    let price = prices[i][1];
+                    let date = unixTime2Date(unix_time);
+                    let year = date[0];
+                    let month = date[1];
+                    let day = date[2];
+                    let hour = date[3];
+                    let minutes = date[4];
+                    let seconds = date[5];
+
+                    dataPoints.push({x: new Date(year, month, day, hour, minutes, seconds), y: price});
+                }
                 chart.render();
+                updateChart();
             });
+
+            function updateChart() {
+                $.getJSON("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd", function (data) {
+                    $.each(data, function (key, value) {
+                        let price = data['bitcoin']['usd'];
+
+                        dataPoints.push({
+                            x: new Date(), // Date()는 현재 시각을 담고 있음
+                            y: price
+                        });
+                        currentPrice = price;
+                    });
+                    chart.render();
+                    marketPrice();
+                    accountStatus();
+                    setTimeout(function () {
+                        updateChart()
+                    }, 1000); // 60초마다 업데이트로 변경
+                });
+            }
         }
 
-        function currentPrice() {
+        function accountStatus(){
             $.ajax({
                 type: "GET",
-                url: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=USD&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false",
+                url: "/order",
+                data: {},
+                success: function (response) {
+                    let account = response;
+                    let btc_receive = account["btcBalance"];
+                    let usd_receive = account["usdBalance"];
+                    let dollar_receive = account["dollarSign"];
+                    let usd = (dollar_receive, usd_receive);
+                    let btc = ("BTC", dollar_receive, btc_receive);
+                    console.log(account);
+
+                    if (response["result"] === "success") {
+                        appendP(usd, btc)
+                    }
+                }
+            })
+        }
+
+        function appendP (usd, btc) {
+            var txt1 = "<p>${usd}</p>";
+            var txt2 ="<p>${btc}</p>";
+            $("updateAcct").append(txt1, txt2)
+        }
+
+        function marketPrice() {
+            $.ajax({
+                type: "GET",
+                url: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
                 data: {},
                 success: function (response) {
                     let btc = response["bitcoin"];
                     let price = btc["usd"];
-                    $('#update').empty().append(price);
+                    document.getElementById("marketPrice").value = price;
                     console.log(price);
-                   }
-                })
+                }
+            })
+        }
+
+        function orderTotal() {
+            var quantity = document.getElementById("orderCount").value;
+            var btcPrice = document.getElementById("marketPrice").value;
+            if (quantity === "") {
+                document.getElementById("totalPrice").value = "0.00";
+            } else {
+                document.getElementById("totalPrice").value = (btcPrice * quantity).toFixed(2);
+            }
+        }
+
+
+        function orderSubmit() {
+            let type = $("#orderType").val();
+            let btcPrice = $("#marketPrice").val();
+            let quantity = $("#orderCount").val();
+            let total = $("#totalPrice").val();
+
+            if (type === "") {
+                alert("Please select order type.")
+                $("#orderType").focus()
+                return
+            } else if (btcPrice === "") {
+                alert("Market Price Error - Please contact administrator.")
+                $("#marketPrice").focus()
+                return
+            } else if (quantity === "") {
+                alert("Please provide order amount.")
+                $("#orderCount").focus()
+                return
+            } else if (total === "") {
+                alert("Total Price Error - Please contact administrator.")
+                $("#totalPrice").focus()
+                return
+            } else if (parseInt(total) > 50000) {
+                alert("Not enough funds available")
+                $("#totalPrice").focus()
+                return
             }
 
-        // Script for posting orders to database
-        //$ajax({
-        //  type: "POST",
-        //url: "/orders",
-        //data: {},
-        // })
+            $.ajax({
+                type: "POST",
+                url: "/order",
+                data: {type_give: type, price_give: btcPrice, count_give: quantity, total_give: total},
+                success: function (response) {
+                    if (response["result"] === "success") {
+                        alert("Order Complete");
+                        window.location.reload();
+                    }
+                }
+            })
+        }
+
+
     </script>
 </head>
 
 <body>
 
 <form class="left">
+    <h1>Practice trading Bitcoin instantly!</h1>
     <div id="chartContainer" style="height: 500px; width: 900px;"></div>
 </form>
 
 <div>
     <form class="topright">
-        <p>Available to trade</p>
-        <p class="details"> USD $50,000.00</p>
-        <p class="details"> BTC 0.00 </p>
+        <p id="updateAcct">Available to trade</p>
     </form>
 
     <form class="right">
         <div class="form-group">
             <label for="exampleFormControlSelect1">Order Type</label>
-            <select class="form-control" id="exampleFormControlSelect1">
+            <select class="form-control" id="orderType">
                 <option>BUY</option>
                 <option>SELL</option>
             </select>
         </div>
         <div class="form-group">
             <label for="exampleFormControlInput1">Current Market Price (USD$)</label>
-            <input type="text" id="update" class="form-control" id="exampleFormControlInput1" placeholder="$0.00" disabled>
+            <input type="text" id="marketPrice" class="form-control" readonly>
         </div>
         <div class="form-group">
             <label for="exampleFormControlInput1">Order Quantity</label>
-            <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="0 BTC">
+            <input type="text" class="form-control" id="orderCount" oninput="orderTotal()">
         </div>
         <div class="form-group">
             <label for="exampleFormControlInput1">Total</label>
-            <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="$0.00">
+            <input type="text" class="form-control" id="totalPrice" placeholder="0.00" readonly>
         </div>
-         <button type="button" class="btn btn-primary btn-sm">Submit Order</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="orderSubmit()">Submit Order</button>
     </form>
 </div>
 </body>

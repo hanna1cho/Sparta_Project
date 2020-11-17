@@ -24,8 +24,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Rubik&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Viga&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
-        <link rel="preconnect" href="https://fonts.gstatic.com">
-<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@700&display=swap" rel="stylesheet">
 
     <style type="text/css">
 
@@ -69,9 +69,33 @@
             margin-top: 40px;
         }
 
+        a {
+            color:white;
+        }
     </style>
 
     <script type="text/javascript">
+
+        // window.onload = function () {
+        //     accountStart();
+        // }
+        //
+        // function accountStart() {
+        //     let totalAmount = $("#total").val();
+        //     let btcCount = $("#btcQuantity").val();
+        //     let btcAmount = $("#btcBalance").val();
+        //     let usdAmount = $("#usdBalance").val();
+        //     $.ajax({
+        //         type: "GET",
+        //         url: "/order",
+        //         data: {total_give: totalAmount, btcNum_give: btcCount, btcDollar_give: btcAmount, usd_give: usdAmount},
+        //         success: function (response) {
+        //             if (response["result"] === "success") {
+        //                 window.location.reload();
+        //             }
+        //         }
+        //     })
+        // }
 
     </script>
 
@@ -82,7 +106,7 @@
 
 <div class="main">
     <p>Total Balance</p>
-    <h1>$50,000</h1>
+    <h1 id="total">$50,000</h1>
     <p>Portfolio</p>
     <table class="center">
         <tr>
@@ -92,21 +116,16 @@
         </tr>
         <tr>
             <td> BTC </td>
-            <td> 0 </td>
-            <td> $0 </td>
-        </tr>
-        <tr>
-            <td> ETH </td>
-            <td> 0 </td>
-            <td> $0 </td>
+            <td id="btcQuantity"> 0 </td>
+            <td id="btcBalance"> $0 </td>
         </tr>
         <tr>
             <td> USD </td>
-            <td> 0 </td>
-            <td> $0 </td>
+            <td> - </td>
+            <td id="usdBalance"> $50,000 </td>
         </tr>
     </table>
-    <button type="button" class="btn btn-primary">Trade</button>
+    <button type="button" class="btn btn-primary"><a href="http://localhost:63342/My_Project/templates/index.html?_ijt=oro66uf26lirvrpebdq5fp0crh">Trade</button>
 </div>
 
 </body>
