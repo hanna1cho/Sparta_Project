@@ -32,7 +32,7 @@
 
         * {
             font-family: 'roboto', sans-serif;
-            font-style: bold;
+            font-weight: bold;
             color: white;
             margin: auto;
         }
@@ -75,10 +75,19 @@
 
         .left {
             font-family: 'roboto', sans-serif;
-            font-style: bold;
+            font-weight: bold;
             position: absolute;
             left: 50px;
             top: 50px;
+        }
+
+        div.back {
+            font-family: 'roboto', sans-serif;
+            font-weight: bold;
+            font-size: 15px;
+            position: absolute;
+            right: 50px;
+            align: right;
         }
 
         button {
@@ -89,6 +98,8 @@
     </style>
 
     <script type="text/javascript">
+        let usdBalance = 0;
+        let btcNum = 0;
 
         function unixTime2Date(unix_timestamp) {
             let date = new Date(unix_timestamp);
@@ -104,7 +115,7 @@
         }
 
         window.onload = function () {
-            let balance = 1000;
+            accountStatus();
             let dataPoints = [];
             let currentPrice = -1;
             let chart = new CanvasJS.Chart("chartContainer", {
@@ -164,39 +175,42 @@
                     });
                     chart.render();
                     marketPrice();
-                    accountStatus();
                     setTimeout(function () {
                         updateChart()
                     }, 1000); // 60초마다 업데이트로 변경
                 });
             }
-        }
+        };
 
-        function accountStatus(){
+        // 잘 안됨
+        function accountStatus() {
             $.ajax({
                 type: "GET",
                 url: "/order",
                 data: {},
                 success: function (response) {
-                    let account = response;
-                    let btc_receive = account["btcBalance"];
-                    let usd_receive = account["usdBalance"];
-                    let dollar_receive = account["dollarSign"];
-                    let usd = (dollar_receive, usd_receive);
-                    let btc = ("BTC", dollar_receive, btc_receive);
-                    console.log(account);
-
                     if (response["result"] === "success") {
-                        appendP(usd, btc)
+                        let account = response['account'];
+                        let btc_receive = account["btcQuantity"];
+                        let usd_receive = account["usdBalance"];
+                        let dollar_receive = account["dollarSign"];
+
+                        let usd = (dollar_receive + usd_receive);
+                        let btcFixed = btc_receive.toFixed(2);
+                        let btc = ("BTC" + btcFixed);
+                        usdBalance = parseInt(usd_receive);
+                        btcNum = parseInt(btc_receive);
+
+                        appendP(usd, btc);
                     }
                 }
             })
         }
 
-        function appendP (usd, btc) {
-            var txt1 = "<p>${usd}</p>";
-            var txt2 ="<p>${btc}</p>";
-            $("updateAcct").append(txt1, txt2)
+        // 잘 안됨
+        function appendP(usd, btc) {
+            $("#usdBalance").text(usd);
+            $("#btcNum").text(btc);
         }
 
         function marketPrice() {
@@ -231,42 +245,50 @@
             let total = $("#totalPrice").val();
 
             if (type === "") {
-                alert("Please select order type.")
-                $("#orderType").focus()
+                alert("Please select order type.");
+                $("#orderType").focus();
                 return
             } else if (btcPrice === "") {
-                alert("Market Price Error - Please contact administrator.")
-                $("#marketPrice").focus()
+                alert("Market Price Error - Please contact administrator.");
+                $("#marketPrice").focus();
                 return
             } else if (quantity === "") {
-                alert("Please provide order amount.")
-                $("#orderCount").focus()
+                alert("Please provide order amount.");
+                $("#orderCount").focus();
                 return
             } else if (total === "") {
-                alert("Total Price Error - Please contact administrator.")
-                $("#totalPrice").focus()
+                alert("Total Price Error - Please contact administrator.");
+                $("#totalPrice").focus();
                 return
-            } else if (parseInt(total) > 50000) {
-                alert("Not enough funds available")
-                $("#totalPrice").focus()
+            } else if (type === 'BUY' && parseInt(total) > usdBalance) {
+                alert("Not enough funds available");
+                $("#totalPrice").focus();
+                return
+            }
+            else if (type === 'SELL' && parseInt(quantity) > btcNum) {
+                alert("Not enough BTC available");
+                $("#orderCount").focus();
                 return
             }
 
             $.ajax({
                 type: "POST",
                 url: "/order",
-                data: {type_give: type, price_give: btcPrice, count_give: quantity, total_give: total},
+                data: {type_give: type,
+                    price_give: btcPrice,
+                    count_give: quantity,
+                    total_give: total},
                 success: function (response) {
                     if (response["result"] === "success") {
                         alert("Order Complete");
-                        window.location.reload();
+                        accountStatus();
+                        // window.location.reload(); // 새로고침안해도됨
                     }
                 }
-            })
-        }
-
+            })}
 
     </script>
+
 </head>
 
 <body>
@@ -279,6 +301,8 @@
 <div>
     <form class="topright">
         <p id="updateAcct">Available to trade</p>
+        <p id="usdBalance">$0</p>
+        <p id="btcNum">BTC 0</p>
     </form>
 
     <form class="right">
@@ -304,5 +328,8 @@
         <button type="button" class="btn btn-primary btn-sm" onclick="orderSubmit()">Submit Order</button>
     </form>
 </div>
+ <div class="back">
+     <p><a href="http://localhost:5000/account"> Back to Account Home </a></p>
+ </div>
 </body>
 </html>

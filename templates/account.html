@@ -55,7 +55,7 @@
             color: lightslategray;
         }
 
-        h1 {
+        p.head {
             font-size: 100px;
             color: lightslategray;
             margin-bottom: 40px;
@@ -76,27 +76,51 @@
 
     <script type="text/javascript">
 
-        // window.onload = function () {
-        //     accountStart();
-        // }
-        //
-        // function accountStart() {
-        //     let totalAmount = $("#total").val();
-        //     let btcCount = $("#btcQuantity").val();
-        //     let btcAmount = $("#btcBalance").val();
-        //     let usdAmount = $("#usdBalance").val();
-        //     $.ajax({
-        //         type: "GET",
-        //         url: "/order",
-        //         data: {total_give: totalAmount, btcNum_give: btcCount, btcDollar_give: btcAmount, usd_give: usdAmount},
-        //         success: function (response) {
-        //             if (response["result"] === "success") {
-        //                 window.location.reload();
-        //             }
-        //         }
-        //     })
-        // }
+        let total = 0;
+        let btcQuantity = 0;
+        let btcBalance = 0;
+        let usdBalance = 0;
 
+        window.onload = function () {
+            accountStatus();}
+
+        function accountStatus() {
+            $.ajax({
+                type: "GET",
+                url: "/order",
+                data: {},
+                success: function (response) {
+                    if (response["result"] === "success") {
+                        let account = response['account'];
+                        let total_receive = account["accountTotal"];
+                        let btc_receive = account["btcQuantity"];
+                        let btc_Amt = account["btcBalance"];
+                        let usd_receive = account["usdBalance"];
+                        let dollar_receive = account["dollarSign"];
+
+                        let usd = (dollar_receive + usd_receive);
+                        let btcFixed = btc_receive.toFixed(0);
+                        let btcFixed2 = btc_Amt.toFixed(0);
+                        let btcNum = ("BTC" + btcFixed);
+                        let btcAmt = (dollar_receive + btcFixed2);
+
+                        total = parseInt(total_receive);
+                        btcQuantity = parseInt(btc_receive);
+                        btcBalance = parseInt(btc_Amt);
+                        usdBalance = parseInt(usd_receive);
+
+                        appendP(total_receive, btcNum, btcAmt, usd);
+                    }
+                }
+            })
+        }
+
+        function appendP(total, btcNum, btcAmt, usd) {
+            $("#total").text(total);
+            $("#btcQuantity").text(btcNum);
+            $("#btcBalance").text(btcAmt);
+            $("#usdBalance").text(usd);
+        }
     </script>
 
 
@@ -106,7 +130,7 @@
 
 <div class="main">
     <p>Total Balance</p>
-    <h1 id="total">$50,000</h1>
+    <p class="head" id="total">$50000</p>
     <p>Portfolio</p>
     <table class="center">
         <tr>
@@ -122,10 +146,10 @@
         <tr>
             <td> USD </td>
             <td> - </td>
-            <td id="usdBalance"> $50,000 </td>
+            <td id="usdBalance"> $50000 </td>
         </tr>
     </table>
-    <button type="button" class="btn btn-primary"><a href="http://localhost:63342/My_Project/templates/index.html?_ijt=oro66uf26lirvrpebdq5fp0crh">Trade</button>
+    <button type="button" class="btn btn-primary"><a href="http://localhost:5000/">Trade</button>
 </div>
 
 </body>

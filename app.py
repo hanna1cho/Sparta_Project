@@ -1,13 +1,11 @@
-from datetime import datetime
-
 from flask import Flask, render_template, jsonify, request
 from pymongo import MongoClient
-from datetime import datetime
 
 app = Flask(__name__)
 client = MongoClient('localhost', 27017)
 db = client.trade_orders
 collection = db.account_status
+collection.drop()
 
 day1 = {
     "accountid": "None",
@@ -22,14 +20,21 @@ day1 = {
 collection.insert_one(day1)
 print('Success, day1')
 
+
 ## HTML 화면 보기
 @app.route('/')
 def home():
     return render_template('index.html')
 
+
 @app.route('/account')
 def account():
     return render_template('account.html')
+
+@app.route('/home')
+def account():
+    return render_template('coins.html')
+
 
 @app.route('/order', methods=['POST'])
 def save_order():
@@ -48,38 +53,46 @@ def save_order():
 
     db.trade_orders.insert_one(doc)
 
-    if (type_receive == 'BUY'):
+    if type_receive == 'BUY':
         new_account = collection.find_one({"accountid": "None"})
-        new_tradeHistory = new_account['tradeHistory']+1
-        new_usdBalance = new_account['accountTotal'] - float(total_receive)
+
+        new_tradeHistory = new_account['tradeHistory'] + 1
+        new_usdBalance = new_account['usdBalance'] - float(total_receive)
         new_btcQuant = new_account['btcQuantity'] + float(count_receive)
         new_btcBalance = new_btcQuant * float(price_receive)
         new_total = new_usdBalance + new_btcBalance
 
-        collection.update_one({"accountid": "None"},{'$set':{'tradeHistory':new_tradeHistory}}, {'$set':{'accountTotal':new_total}},
-                              {'$set':{'btcQuantity':new_btcQuant}}, {'$set':{'btcBalance':new_btcBalance}},
-                              {'$set':{'usdBalance':new_usdBalance}})
+        collection.update_one({"accountid": "None"},
+                              {'$set': {'tradeHistory': new_tradeHistory,
+                                        'accountTotal': new_total,
+                                        'btcQuantity': new_btcQuant,
+                                        'btcBalance': new_btcBalance,
+                                        'usdBalance': new_usdBalance}})
 
-    else :
+    elif type_receive == 'SELL':
         new_account = collection.find_one({"accountid": "None"})
-        new_tradeHistory = new_account['tradeHistory']+1
-        new_usdBalance = new_account['accountTotal'] + float(total_receive)
+        new_tradeHistory = new_account['tradeHistory'] + 1
+        new_usdBalance = new_account['accountTotal']
         new_btcQuant = new_account['btcQuantity'] - float(count_receive)
         new_btcBalance = new_btcQuant * float(price_receive)
         new_total = new_usdBalance + new_btcBalance
 
-        collection.update_one({"accountid": "None"},{'$set':{'tradeHistory':new_tradeHistory}}, {'$set':{'accountTotal':new_total}},
-                              {'$set':{'btcQuantity':new_btcQuant}}, {'$set':{'btcBalance':new_btcBalance}},
-                              {'$set':{'usdBalance':new_usdBalance}})
-
+        collection.update_one({"accountid": "None"},
+                              {'$set': {'tradeHistory': new_tradeHistory,
+                                        'accountTotal': new_total,
+                                        'btcQuantity': new_btcQuant,
+                                        'btcBalance': new_btcBalance,
+                                        'usdBalance': new_usdBalance}})
+    else:
+        jsonify({'result': 'fail'})
 
     return jsonify({'result': 'success'})
 
 
 @app.route('/order', methods=['GET'])
 def read_account():
-
-    result = list(collection.find({}, {'_id': 0}))
+    result = collection.find_one({"accountid": "None"}, {'_id': 0})
+    print(result)
 
     return jsonify({'result': 'success', 'account': result})
 
