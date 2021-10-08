@@ -27,6 +27,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@700&display=swap" rel="stylesheet">
 
+    <script type="text/javaScript">
+        function moveToTrade() {
+            location.href = "/trade";
+        }
+    </script>
+
     <style type="text/css">
 
         * {
@@ -98,9 +104,9 @@
                         let usd_receive = account["usdBalance"];
                         let dollar_receive = account["dollarSign"];
 
-                        let usd = (dollar_receive + usd_receive);
-                        let btcFixed = btc_receive.toFixed(0);
-                        let btcFixed2 = btc_Amt.toFixed(0);
+                        let usd = (dollar_receive + usd_receive.toFixed(0));
+                        let btcFixed = btc_receive.toFixed(2);
+                        let btcFixed2 = btc_Amt.toFixed(2);
                         let btcNum = ("BTC" + btcFixed);
                         let btcAmt = (dollar_receive + btcFixed2);
 
@@ -149,7 +155,7 @@
             <td id="usdBalance"> $50000 </td>
         </tr>
     </table>
-    <button type="button" class="btn btn-primary"><a href="http://localhost:5000/">Trade</button>
+    <button type="button" class="btn btn-primary" onclick="moveToTrade()">Trade</button>
 </div>
 
 </body>

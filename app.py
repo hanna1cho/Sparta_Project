@@ -2,7 +2,7 @@ from flask import Flask, render_template, jsonify, request
 from pymongo import MongoClient
 
 app = Flask(__name__)
-client = MongoClient('localhost', 27017)
+client = MongoClient('mongodb://test:test@52.79.240.153', 27017)
 db = client.trade_orders
 collection = db.account_status
 collection.drop()
@@ -22,8 +22,8 @@ print('Success, day1')
 
 
 ## HTML 화면 보기
-@app.route('/')
-def home():
+@app.route('/trade')
+def trade():
     return render_template('index.html')
 
 
@@ -31,8 +31,8 @@ def home():
 def account():
     return render_template('account.html')
 
-@app.route('/home')
-def account():
+@app.route('/')
+def home():
     return render_template('coins.html')
 
 
@@ -71,8 +71,9 @@ def save_order():
 
     elif type_receive == 'SELL':
         new_account = collection.find_one({"accountid": "None"})
+
         new_tradeHistory = new_account['tradeHistory'] + 1
-        new_usdBalance = new_account['accountTotal']
+        new_usdBalance = new_account['usdBalance'] + (float(price_receive) * float(count_receive))
         new_btcQuant = new_account['btcQuantity'] - float(count_receive)
         new_btcBalance = new_btcQuant * float(price_receive)
         new_total = new_usdBalance + new_btcBalance

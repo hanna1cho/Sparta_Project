@@ -195,11 +195,11 @@
                         let usd_receive = account["usdBalance"];
                         let dollar_receive = account["dollarSign"];
 
-                        let usd = (dollar_receive + usd_receive);
+                        let usd = dollar_receive + usd_receive.toFixed(2);
                         let btcFixed = btc_receive.toFixed(2);
                         let btc = ("BTC" + btcFixed);
-                        usdBalance = parseInt(usd_receive);
-                        btcNum = parseInt(btc_receive);
+                        usdBalance = usd_receive.toFixed(2);
+                        btcNum = btc_receive.toFixed(2);
 
                         appendP(usd, btc);
                     }
@@ -274,18 +274,22 @@
             $.ajax({
                 type: "POST",
                 url: "/order",
-                data: {type_give: type,
+                data: {
+                    type_give: type,
                     price_give: btcPrice,
                     count_give: quantity,
-                    total_give: total},
+                    total_give: total
+                },
                 success: function (response) {
                     if (response["result"] === "success") {
                         alert("Order Complete");
                         accountStatus();
-                        // window.location.reload(); // 새로고침안해도됨
+                    } else {
+                        alert("Order Failed. Please try again");
                     }
                 }
-            })}
+            })
+        }
 
     </script>
 
@@ -328,8 +332,8 @@
         <button type="button" class="btn btn-primary btn-sm" onclick="orderSubmit()">Submit Order</button>
     </form>
 </div>
- <div class="back">
-     <p><a href="http://localhost:5000/account"> Back to Account Home </a></p>
- </div>
+<div class="back">
+    <p><a href="/account"> Back to Account Home </a></p>
+</div>
 </body>
 </html>

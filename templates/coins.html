@@ -26,14 +26,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@700&display=swap" rel="stylesheet">
-
+    <script type="text/javaScript">
+        function moveToAccount() {
+            location.href = "/account";
+        }
+    </script>
 
     <style type="text/css">
 
         * {
             background-color: #F4D4D4;
             font-family: 'raleway', sans-serif;
-            font-style: bold;
+            font-weight: bold;
             color: white;
         }
 
@@ -50,8 +54,8 @@
             font-size: 40px;
         }
 
-         a {
-           color:white;
+        a {
+            color: white;
         }
     </style>
 </head>
@@ -61,7 +65,7 @@
 <div>
     <h1>Coins</h1>
     <p>Trading for fun</p>
-    <button type="button" class="btn btn-primary"><a href="http://localhost:5000/account">Enter</button>
+    <button type="button" class="btn btn-primary" onclick="moveToAccount()">Enter</button>
 </div>
 
 </body>
